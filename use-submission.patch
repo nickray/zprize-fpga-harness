@@ -1,0 +1,67 @@
+diff --git a/evaluate.sh b/evaluate.sh
+index a3b76d2..bd7fb9f 100755
+--- a/evaluate.sh
++++ b/evaluate.sh
+@@ -51,11 +51,11 @@ sudo fpga-load-local-image -S 0 -I $AGFI_ID
+ # Run correctness tests
+ info Testing correctness
+ pushd harness
+-cargo test --release
++sudo cargo test --release
+ 
+ # Run benchmark
+ info Benchmarking
+-cargo bench
++sudo cargo bench
+ popd
+ 
+ # The output should now be in `harness/target/criterion/**`
+diff --git a/harness/Cargo.toml b/harness/Cargo.toml
+index aadab68..d44cdc6 100644
+--- a/harness/Cargo.toml
++++ b/harness/Cargo.toml
+@@ -12,6 +12,8 @@ rand = "0.8"
+ 
+ ark-bls12-377 = "0.3"
+ 
++zprize-fpga-msm = { path = "../submission/driver" }
++
+ [dev-dependencies]
+ criterion = { version = "0.3", features = [ "html_reports" ] }
+ 
+diff --git a/harness/src/api.rs b/harness/src/api.rs
+index 33c77ed..bf5abbe 100644
+--- a/harness/src/api.rs
++++ b/harness/src/api.rs
+@@ -1,30 +1 @@
+-use ark_ec::AffineCurve;
+-use ark_ff::PrimeField;
+-use std::os::raw::c_void;
+-
+-#[repr(C)]
+-pub struct MultiScalarMultContext {
+-    context: *mut c_void,
+-}
+-
+-pub fn multi_scalar_mult_init<G: AffineCurve>(_points: &[G]) -> MultiScalarMultContext {
+-    MultiScalarMultContext {
+-        context: std::ptr::null_mut(),
+-    }
+-}
+-
+-pub fn multi_scalar_mult<G: AffineCurve>(
+-    _context: &mut MultiScalarMultContext,
+-    points: &[G],
+-    scalars: &[<G::ScalarField as PrimeField>::BigInt],
+-) -> Vec<G::Projective> {
+-    let npoints = points.len();
+-    if scalars.len() % npoints != 0 {
+-        panic!("length mismatch")
+-    }
+-
+-    scalars
+-        .chunks_exact(npoints)
+-        .map(|batch| ark_ec::msm::VariableBaseMSM::multi_scalar_mul(points, batch))
+-        .collect()
+-}
++pub use zprize_fpga_msm::*;
