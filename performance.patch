@@ -1,0 +1,18 @@
+diff --git a/evaluate.sh b/evaluate.sh
+index bd7fb9f..8c39a58 100755
+--- a/evaluate.sh
++++ b/evaluate.sh
+@@ -51,11 +51,11 @@ sudo fpga-load-local-image -S 0 -I $AGFI_ID
+ # Run correctness tests
+ info Testing correctness
+ pushd harness
+-sudo cargo test --release
++RUSTFLAGS='-C target-cpu=native' sudo -E cargo test --release
+ 
+ # Run benchmark
+ info Benchmarking
+-sudo cargo bench
++RUSTFLAGS='-C target-cpu=native' sudo -E cargo bench
+ popd
+ 
+ # The output should now be in `harness/target/criterion/**`
